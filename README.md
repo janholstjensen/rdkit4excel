@@ -108,5 +108,5 @@ python rdkitXL_server.py --debug
 Open PythonWin and open the Tools -> Trace collector debugging tool to watch the messages and print statements
 
 
-# Known BUGS
+# Known bugs and issues
 The IDL generation and compilation will fail if a default parameter contains " (double-quotes) in a string quoted by ' (single-quotes).
