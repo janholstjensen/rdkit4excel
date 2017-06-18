@@ -93,9 +93,9 @@ Register the add-in in Excel. Start Excel and:
 	* Click "OK".
 * Restart Excel.
 
-You should now be able to enter "=rdkit_version()" and have the RDKit version returned. If you see #NAME? in the cell
+You should now be able to enter "=rdkit_version()" in a cell and have the RDKit version returned. If you see "#NAME?" in the cell
 it means that the add-in was not successfully registered and loaded in Excel after all. Retry the registration or
-ask for help on Github.
+ask for help on GitHub.
 
 
 ## Troubleshooting
