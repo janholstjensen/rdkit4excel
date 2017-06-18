@@ -78,7 +78,8 @@ ocidl.acf
 Registering C:\Users\jan\rdkit4excel\src\RDkitXL.tlb
 Registered: Python.RDKitXL
 
-C:\Users\jan\rdkit4excel\src>```
+C:\Users\jan\rdkit4excel\src>
+```
 
 The single warning about failing to load msado15.dll can be safely ignored.
 
