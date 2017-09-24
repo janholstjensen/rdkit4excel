@@ -13,7 +13,7 @@ added to Excel.
 * Python modules pythoncom and win32com
 * Python modules for RDKit
 * Microsoft visual C 9.0 for python 2.7
-	* Works for both Python 2 and 3.
+	* Works for both Python 2 and 3 (in this project!).
 	* Only needed if you add new Excel-callable functions to the add-in.
 
 With the default configuration, your Python installation has to be the same bitness as your Excel.
