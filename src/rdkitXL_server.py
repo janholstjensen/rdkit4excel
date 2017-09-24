@@ -28,7 +28,7 @@ class CRDKitXL:
 	# COM registry declarations.
 	#
 	_reg_clsid_ = '{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}'
-	_reg_desc_ = "RDKitXL object"
+	_reg_desc_ = "RDKitXL add-in"
 	_reg_progid_ = "Python.RDKitXL"
 	_reg_options_ = {"Programmable":''}
 
@@ -132,7 +132,7 @@ def BuildTypelib(idlfile = "RDKitXL.idl"):
 		previous_idl_txt = "".join(open(prev_idl, 'r').readlines())
 
 	if this_idl_txt != previous_idl_txt:
-		print("Compiling %s" % (idl,))
+		print("Compiling %s." % (idl,))
 		rc = os.system ('midl "%s"' % (idl,))
 		if rc:
 			raise RuntimeError("Compiling MIDL failed!")
@@ -145,7 +145,7 @@ def BuildTypelib(idlfile = "RDKitXL.idl"):
 	else:
 		print("No IDL changes.")
 
-	print("Registering %s" % (tlb,))
+	print("Registering %s." % (tlb,))
 	tli=pythoncom.LoadTypeLib(tlb)
 	pythoncom.RegisterTypeLib(tli,tlb)
 
@@ -157,7 +157,7 @@ def UnregisterTypelib():
 									k._typelib_version_[1], 
 									0, 
 									pythoncom.SYS_WIN32)
-		print("Unregistered typelib")
+		print("Unregistered typelib.")
 	except pythoncom.error as details:
 		if details[0]==winerror.TYPE_E_REGISTRYACCESS:
 			pass

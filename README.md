@@ -20,10 +20,10 @@ If you have 32-bit Excel and use a 64-bit Python you must set the Python service
 out-of-process service (for more details see the [INSTALL document] (./doc/INSTALL.md).
 
 
-# Known bugs and issues
+## Known bugs and issues
 The IDL generation and compilation will fail if a default parameter contains " (double-quotes)
 in a string quoted by ' (single-quotes).
 
 
-# License
+## License
 Code released under the [BSD license](https://github.com/janholstjensen/rdkit4excel/blob/master/LICENSE.TXT).
