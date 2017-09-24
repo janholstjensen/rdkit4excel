@@ -46,7 +46,6 @@ Example run:
 ```
 C:\Windows\system32>cd \Users\jan\rdkit4excel\src
 
-C:\Users\jan\rdkit4excel\src>python RDKitXL_server.py
 C:\Users\Jan\rdkit4excel\src>python RDKitXL_server.py
 No IDL changes.
 Registering C:\Users\Jan\rdkit4excel\src\RDKitXL.tlb.
@@ -215,7 +214,10 @@ This will start up the Python COM service in a separate process instead of loadi
 of Excel. It will be slower, but it allows 32- and 64-bit code to communicate and also isolates your Python
 code from Excel so one cannot crash the other.
 
-In addition, you need to make the registered 64-bit COM service visible from Excel. Locate the following registry key:
+After changing this line you must run `RDKitXL_server.py` successfully to get the registry entries updated.
+
+After the registry update, you need to make the registered 64-bit COM service visible from Excel.
+Locate the following registry key:
 
 `HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}`
 
