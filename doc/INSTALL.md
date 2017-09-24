@@ -72,25 +72,61 @@ work, ask for help on GitHub.
 
 
 ## Adding new functions
+You can easily add new Excel-callable functions to the add-in.
 
-* Microsoft visual C 9.0 for python 2.7
-	* Get VCForPython27.msi from https://www.microsoft.com/en-us/download/details.aspx?id=44266 and run it.
+Let's say that you add the infamous example function `rdkit_fat_mw()` that implements
+an alternative and utterly useless 'rule of five':
+
+```
+#RDKITXL: in:smiles:str, out:float
+	def rdkit_fat_mw(self, smiles):
+		self.rdkit_info_num_calls = self.rdkit_info_num_calls +1
+		smiles = dispatch_to_str(smiles)
+
+		mol = Chem.MolFromSmiles(smiles)		
+		if mol != None:
+			return Descriptors.MolWt(mol) * 5
+		else:
+			return 'ERROR: Cannot parse SMILES input.'
+```
+
+Comments in `RDKitXL_server.py` provide more details on how the `#RDKITXL:` comment should
+be written.
+
+The new function needs to be published to the type library. We do that by re-running `RDKitXL_server.py`.
+Start a command prompt as administrator:
+
+```
+C:\Windows\system32>cd \Users\jan\rdkit4excel\src
+
+C:\Users\Jan\rdkit4excel\src>python RDKitXL_server.py
+Compiling C:\Users\Jan\rdkit4excel\src\RDKitXL.idl.
+'midl' is not recognized as an internal or external command,
+operable program or batch file.
+Traceback (most recent call last):
+  File "RDKitXL_server.py", line 202, in <module>
+    main(sys.argv)
+  File "RDKitXL_server.py", line 197, in main
+    BuildTypelib(genfile)
+  File "RDKitXL_server.py", line 160, in BuildTypelib
+    raise RuntimeError("Compiling MIDL failed!")
+RuntimeError: Compiling MIDL failed!
+
+C:\Users\Jan\rdkit4excel\src>
+```
+
+If you already have a full Visual Studio install you can start a Visual Studio command prompt
+as administrator and that should be it.
+
+Alternatively you can download and install a minimal suite of MS Visual Studio tools.
+
+* Download the "Microsoft visual C 9.0 for Python 2.7" package VCForPython27.msi from https://www.microsoft.com/en-us/download/details.aspx?id=44266 and run it.
 	* The MSI package installs per default for the current user only and so doesn't mess up your system settngs.
-	* You only need this if you want to add new Excel-callable functions to RDKitXL_server.py.
-* Install Microsoft visual C 9.0 for python 2.7
-	* Get VCForPython27.msi from https://www.microsoft.com/en-us/download/details.aspx?id=44266 and run it.
-	* The MSI package installs per default for the current user only and so doesn't mess up your system settngs.
-	* You only need this if you want to add new Excel-callable functions to `RDKitXL_server.py`.
 
-You need the MSVC tools to recompile the type library if you add new functions or change existing
-function signatures. If you only change function implementations then you don't need the MSVC tools.
+The above Python 2.7 tools are OK for Python 3 as well. We only use the MIDL compiler to
+build a type library and that is independent of the Python version.
 
-You can still use the Python2.7 MSVC download for the Python3 install, since all we ever use is
-the MIDL compiler - nothing related to Python.
-
-Set your path - either the SYSTEM path or the local path - to include C:\Users\Jan\Miniconda3.
-
-Example registration (your path to the vcvarsall.bat file will be different):
+Example build (your path to the vcvarsall.bat file will be different):
 
 ```
 C:\Windows\system32>cd \Users\jan\rdkit4excel\src
@@ -98,7 +134,7 @@ C:\Windows\system32>cd \Users\jan\rdkit4excel\src
 C:\Users\jan\rdkit4excel\src>"c:\Users\jan\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
 Setting environment for using Microsoft Visual Studio 2008 x86 tools.
 
-C:\Users\jan\rdkit4excel\src>python rdkitXL_server.py
+C:\Users\jan\rdkit4excel\src>python RDKitXL_server.py
 Compiling C:\Users\Jan\rdkit4excel\src\RDKitXL.idl.
 Microsoft (R) 32b/64b MIDL Compiler Version 7.00.0555
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -136,26 +172,41 @@ Registered: Python.RDKitXL
 C:\Users\Jan\rdkit4excel\src>
 ```
 
+Start Excel, and the new function should now be ready for use.
 
 
-## Deploying new functions
-After having done changes that cause the IDL to change, be sure to deploy the following files.
+## Correcting or changing functions
+Changing an implementation of a function is as simple as changing `RDKitXL_server.py` and restarting
+Excel.
 
-rdkitXL_server.py (of course)
+You only need to rebuild the type library when changes are made to the published function
+signatures. That is: When any `#RDKITXL:` comment is changed, removed, or added.
+
+
+## Deploying new functions to end users
+Any changes to the function implementations only, require a deployment of `RDKitXL_server.py` only.
+
+Changes that cause the type library to change require the following files to be deployed to end users:
+
+```
+RDKitXL_server.py
 RDKitXL.idl
 RDKitXL.idl.previous
 RDKitXL.tlb
+```
+
+You should not need to re-register the type library and COM service on end user's PCs.
 
 
 ## 32-bit Excel and 64-bit Conda
 If you have differing bitness of your Python and Office, e.g. 64-bit Python and 32-bit Office
 you will have to change the configuration and registration a little.
 
-You must set _reg_clsctx_ in RDKitXL_server.py:
+You must set `_reg_clsctx_` in `RDKitXL_server.py`:
 
 ```
-	# Uncomment the next line to run the server in a separate process:
-	# _reg_clsctx_ = pythoncom.CLSCTX_LOCAL_SERVER
+# Uncomment the next line to run the server in a separate process:
+_reg_clsctx_ = pythoncom.CLSCTX_LOCAL_SERVER
 ```
 
 This will start up the Python COM service in a separate process instead of loading it in the memory space
@@ -166,7 +217,7 @@ In addition, you need to make the registered 64-bit COM service visible from Exc
 
 HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}
 
-Export it to disk, open the .REG file in Notepad and change all nine occurrences of "\Classes\" to "\Wow6432Node\Classes\" like this:
+Export it to disk, open the .REG file in Notepad, and change all nine occurrences of "\Classes\" to "\Wow6432Node\Classes\" like this:
 
 ```
 [HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}]
@@ -178,7 +229,6 @@ becomes
 
 Load the .REG file into the registry and the "RDKitXL add-in" should now be visible in Excel's list of
 automation servers.
-
 
 
 ## Troubleshooting
