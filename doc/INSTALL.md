@@ -21,7 +21,7 @@ or just the current user - both configurations should work.
 During testing, the Conda installations were done accepting all default settings (installed
 for "Just Me" and no PATH changes). On the testing machines, Conda was thus installed in
 `C:\Users\Jan\Minoconda2\` or `C:\Users\Jan\Minoconda3\`. In the remainder of this document
-I will reference to this Conda root folder as `%CONDA_ROOT%`.
+I will reference this Conda root folder as `%CONDA_ROOT%`.
 
 Note: If you want to use Python 3 it is highly recommended that you install the 64-bit version
 of Minconda3. The 32-bit version has far fewer releases of RDKit and may not have the latest
@@ -127,7 +127,7 @@ Alternatively, you can download and install a minimal suite of MS Visual Studio 
 The above Python 2.7 tools are OK for Python 3 as well. We only use the MIDL compiler to
 build a type library and that is independent of the Python version.
 
-Example build (your path to the vcvarsall.bat file will be different):
+Example build in an administrator command prompt (your path to the vcvarsall.bat file will be different):
 
 ```
 C:\Windows\system32>cd \Users\jan\rdkit4excel\src
@@ -217,7 +217,7 @@ code from Excel so one cannot crash the other.
 After changing this line you must run `RDKitXL_server.py` successfully to get the registry entries updated.
 
 After the registry update, you need to make the registered 64-bit COM service visible from Excel.
-Locate the following registry key:
+Start `regedit` and locate the following registry key:
 
 `HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}`
 
@@ -231,7 +231,7 @@ becomes
 [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}]
 ```
 
-Load the .REG file into the registry and the "RDKitXL add-in" should now be visible in Excel's list of
+Load the edited .REG file into the registry by double-clicking it. The "RDKitXL add-in" should now be visible in Excel's list of
 automation servers.
 
 
