@@ -73,7 +73,8 @@ If that doesn't work, please open an issue on GitHub.
 
 
 ## Adding new functions
-You can easily add new Excel-callable functions to the add-in.
+You can easily add new Excel-callable functions to the add-in by adding functions to the
+`CRDKitXL` class in `RDKitXL_server.py`.
 
 Let's say that you add the infamous example function `rdkit_fat_mw()` that implements
 an alternative and utterly useless variant of the molecular weight:
