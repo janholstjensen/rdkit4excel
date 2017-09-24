@@ -13,7 +13,8 @@ added to Excel.
 * Python modules pythoncom and win32com
 * Python modules for RDKit
 * Microsoft visual C 9.0 for python 2.7
-	* (Works for both Python 2 and 3 in this setup - only needed if you add new Excel-callable functions to the add-in)
+	* Works for both Python 2 and 3.
+	* Only needed if you add new Excel-callable functions to the add-in.
 
 With the default configuration, your Python installation has to be the same bitness as your Excel.
 If you have 32-bit Excel and use a 64-bit Python you must set the Python service to run as an

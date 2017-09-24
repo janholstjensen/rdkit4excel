@@ -14,18 +14,18 @@
 * Add "C:\Python27\Lib\site-packages\pywin32_system32" to PATH so "pythoncomloader27.dll" can be loaded by Excel.
 
 
-## Prerequisites when using Conda (Python 2 or 3 version)
+## Prerequisites when using Conda (Python 2 or 3)
 Install Miniconda2 or Minoconda3 4.3.11 or later. You may install it for all users
 or just the current user - both configurations should work.
 
 During testing, the Conda installations were done accepting all default settings (installed
 for "Just Me" and no PATH changes). On the testing machines, Conda was thus installed in
 `C:\Users\Jan\Minoconda2\` or `C:\Users\Jan\Minoconda3\`. In the remainder of this document
-I will reference this Conda root folder as `%CONDA_ROOT%`.
+I will reference to this Conda root folder as `%CONDA_ROOT%`.
 
 Note: If you want to use Python 3 it is highly recommended that you install the 64-bit version
 of Minconda3. The 32-bit version has far fewer releases of RDKit and may not have the latest
-version.
+RDKit version.
 
 * Install RDKit
 	* `conda install -c rdkit rdkit`
@@ -34,12 +34,14 @@ version.
 	* It can be added to the current user's PATH or the SYSTEM path as you please.
 
 
-## To compile and register add-in
-Open a Command Prompt *as administrator*. If you do not run the Command Prompt with
-administrator rights you will get an 'Error accessing the OLE registry.' error when
-the script registers the add-in in the registry.
+## To compile and register the Excel add-in
+First, register the add-in the Windows registry.
 
-Example registration run:
+Open a Command Prompt *as administrator*. If you do not run the Command Prompt with
+administrator rights you will get an 'Error accessing the OLE registry' error when
+the script wants to register the add-in in the registry.
+
+Example run:
 
 ```
 C:\Windows\system32>cd \Users\jan\rdkit4excel\src
@@ -53,7 +55,7 @@ Registered: Python.RDKitXL
 C:\Users\Jan\rdkit4excel\src>
 ```
 
-Register the add-in in Excel. Start Excel and:
+Next, register the add-in in Excel. Start Excel and:
 
 * Click File -> Options -> Add-ins
 * Click the "Go" button next to the "Manage: Excel Add-ins" dropdown
@@ -67,15 +69,15 @@ Register the add-in in Excel. Start Excel and:
 
 You should now be able to enter `=rdkit_info_version()` in a cell and have the RDKit version string returned.
 If you see "#NAME?" in the cell it means that the add-in was not successfully registered and loaded in Excel
-after all. Please double-check your PATH settings, retry the registration and restart Excel. If that doesn't
-work, ask for help on GitHub.
+after all. In that case, please double-check your PATH settings, retry the registration, and restart Excel.
+If that doesn't work, please open an issue on GitHub.
 
 
 ## Adding new functions
 You can easily add new Excel-callable functions to the add-in.
 
 Let's say that you add the infamous example function `rdkit_fat_mw()` that implements
-an alternative and utterly useless 'rule of five':
+an alternative and utterly useless variant of the molecular weight:
 
 ```
 #RDKITXL: in:smiles:str, out:float
@@ -90,11 +92,11 @@ an alternative and utterly useless 'rule of five':
 			return 'ERROR: Cannot parse SMILES input.'
 ```
 
-Comments in `RDKitXL_server.py` provide more details on how the `#RDKITXL:` comment should
+The source code comments in `RDKitXL_server.py` provide more details on how the `#RDKITXL:` comments should
 be written.
 
 The new function needs to be published to the type library. We do that by re-running `RDKitXL_server.py`.
-Start a command prompt as administrator:
+If you just start a command prompt as administrator it will fail:
 
 ```
 C:\Windows\system32>cd \Users\jan\rdkit4excel\src
@@ -116,9 +118,9 @@ C:\Users\Jan\rdkit4excel\src>
 ```
 
 If you already have a full Visual Studio install you can start a Visual Studio command prompt
-as administrator and that should be it.
+as administrator and then you should be able to run without errors.
 
-Alternatively you can download and install a minimal suite of MS Visual Studio tools.
+Alternatively, you can download and install a minimal suite of MS Visual Studio tools.
 
 * Download the "Microsoft visual C 9.0 for Python 2.7" package VCForPython27.msi from https://www.microsoft.com/en-us/download/details.aspx?id=44266 and run it.
 	* The MSI package installs per default for the current user only and so doesn't mess up your system settngs.
@@ -172,19 +174,19 @@ Registered: Python.RDKitXL
 C:\Users\Jan\rdkit4excel\src>
 ```
 
-Start Excel, and the new function should now be ready for use.
+(Re)Start Excel, and the new function should now be ready for use.
 
 
 ## Correcting or changing functions
 Changing an implementation of a function is as simple as changing `RDKitXL_server.py` and restarting
 Excel.
 
-You only need to rebuild the type library when changes are made to the published function
-signatures. That is: When any `#RDKITXL:` comment is changed, removed, or added.
+You only need to rebuild the type library (re-run `RDKitXL_server.py`) when changes are made 
+to the published function signatures. That is: When any `#RDKITXL:` comment is changed, removed, or added.
 
 
 ## Deploying new functions to end users
-Any changes to the function implementations only, require a deployment of `RDKitXL_server.py` only.
+If only function implementations are changed, a deployment of `RDKitXL_server.py` is all that is required.
 
 Changes that cause the type library to change require the following files to be deployed to end users:
 
@@ -195,7 +197,7 @@ RDKitXL.idl.previous
 RDKitXL.tlb
 ```
 
-You should not need to re-register the type library and COM service on end user's PCs.
+You should not have to re-register the type library and COM service on end user PCs.
 
 
 ## 32-bit Excel and 64-bit Conda
@@ -215,7 +217,7 @@ code from Excel so one cannot crash the other.
 
 In addition, you need to make the registered 64-bit COM service visible from Excel. Locate the following registry key:
 
-HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}
+`HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}`
 
 Export it to disk, open the .REG file in Notepad, and change all nine occurrences of "\Classes\" to "\Wow6432Node\Classes\" like this:
 
