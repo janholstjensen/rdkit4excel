@@ -19,7 +19,10 @@ import "ocidl.idl";
 	]
 	interface IRDKitXL : IDispatch
 	{		
-#RDKitXL												  									  
+[propget, id(1), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_info_version([out, retval] BSTR *pVal);
+[propget, id(2), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_info_num_calls([out, retval] LONG *pVal);
+[id(3), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_descriptor([in] BSTR smiles, [in, defaultvalue("MolLogP")] BSTR descriptor, [out, retval] FLOAT *val);
+[id(4), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_smiles_to_molblock([in] BSTR smiles, [out, retval] BSTR *val);												  									  
 	};
 
 [
