@@ -8,13 +8,13 @@ py2comtype = { 'str':'BSTR',
 
 def generate_idl(pythonfile, templatefile='template.idl', generatefile='generated.idl'):
 
-	program = file(pythonfile,'r').read()
+	program = open(pythonfile,'r').read()
 	
 	
 	#Match Properties
 	regex = re.compile('\#RDKITXL:\s(.*)\n\s*self\.([a-zA-Z_\-0-9]*)\s')
 	propertymatches = regex.findall(program)
-	if __name__== "__main__": print propertymatches
+	if __name__== "__main__": print(propertymatches)
 	#Match Functions
 	regex = re.compile('\#RDKITXL:\s(.+)\n\s+def\s+(.*)\((.*)\):\n')
 	matches = regex.findall(program)
@@ -54,25 +54,25 @@ def generate_idl(pythonfile, templatefile='template.idl', generatefile='generate
 			elif tags[0] == 'out':
 				idl_line = idl_line + '[out, retval] %s *val);'%py2comtype[tags[1]]
 			else:
-				print "Warning, unknown parameter type",match, parm
+				print("Warning, unknown parameter type",match, parm)
 
 		idl_lines.append(idl_line)
 	
 	if __name__ == "__main__":
 		for l in idl_lines:
-			print l
+			print(l)
 
 	#Join lines	
 	insert = '\n'.join(idl_lines)
 
 	#Substitue in template
-	template = file(templatefile,'r')
+	template = open(templatefile,'r')
 	regex = re.compile('#RDKitXL')
 	idl = regex.sub(insert, template.read())
 	template.close()
 	
 	#Write new .idl file	
-	f=file(generatefile,'w')
+	f=open(generatefile,'w')
 	f.write(idl)
 	f.close()
 	
@@ -81,7 +81,7 @@ def generate_idl(pythonfile, templatefile='template.idl', generatefile='generate
 	
 if __name__ == '__main__':
 	# If started directly, assume that we are testing and generate a 'tester.idl' file.
-	genfile = generate_idl('rdkitXL_server.py', generatefile='tester.idl')
+	genfile = generate_idl('RDKitXL_server.py', generatefile='tester.idl')
 	with file(genfile,'r') as f:
-		print f.read()
+		print(f.read())
 

@@ -1,0 +1,44 @@
+// Template.idl : template IDL for autogeneration of
+// RDKitXL.idl : IDL source for RDKitXL
+// will be overwritten when registering the RDKitXL_server
+
+// This file will be processed by the MIDL tool to
+// produce the type library (RDKitXL.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(016ecf9c-a8fd-4c4a-ad9a-b75f1ce9f2b9),
+		dual,
+		helpstring("IRDKitXL Interface"),
+		pointer_default(unique)
+	]
+	interface IRDKitXL : IDispatch
+	{		
+[propget, id(1), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_version([out, retval] BSTR *pVal);
+[propget, id(2), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall number_of_calls([out, retval] LONG *pVal);
+[id(3), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_descriptor([in] BSTR smiles, [in, defaultvalue("MolLogP")] BSTR descriptor, [out, retval] FLOAT *val);
+[id(4), helpstring("Helpstring not exposed in Excel")] HRESULT _stdcall rdkit_SmilesToMolBlock([in] BSTR smiles, [out, retval] BSTR *val);												  									  
+	};
+
+[
+	uuid(da5bc306-15b4-498a-9c1c-f560aa8b5c32),
+	version(1.0),
+	helpstring("RDKitXL 1.0 Type Library")
+]
+library TESTSERVERLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+	importlib("msado15.dll");
+
+	[
+		uuid(ff6c5138-90aa-405f-ab9e-f7d6860b9e1b),
+		helpstring("RDKitXL Class")
+	]
+	coclass RDKitXL
+	{
+		[default] interface IRDKitXL;
+	};
+};

@@ -13,8 +13,11 @@ import rdkit
 from rdkit import Chem
 from rdkit.Chem import Descriptors, AllChem
 
+# 'six' module is used by isinstance() to detect a string instance in a simple way.
+from six import string_types
+
 def dispatch_to_str(possible_dispatch):
-	if not isinstance(possible_dispatch, unicode):
+	if not isinstance(possible_dispatch, string_types):
 		return str(Dispatch(possible_dispatch))
 	else:
 		return str(possible_dispatch)
@@ -22,17 +25,21 @@ def dispatch_to_str(possible_dispatch):
 
 class CRDKitXL:
 	#
-	# COM declarations	
+	# COM registry declarations.
 	#
-	#To generate new GUID's if starting a completely new project
-	#import uuid
-	#str(uuid.uuid4())	
 	_reg_clsid_ = '{e4d5c553-ebc8-49ca-bacf-4947ef110fc5}'
-	_reg_desc_ = "RDKitXl object"
+	_reg_desc_ = "RDKitXL object"
 	_reg_progid_ = "Python.RDKitXL"
 	_reg_options_ = {"Programmable":''}
-	# Use the following line to run the server as out-of-process service. Slower, but memory-isolated from client.
-	# _reg_clsctx_ = pythoncom.CLSCTX_LOCAL_SERVER	
+
+	# Per default the server runs as an in-process server, meaning that it gets loaded
+	# as a DLL in Excel's memory space. If you run a 32-bit Excel and a 64-bit Python
+	# you will have to uncomment the following line to run the server in a separate
+	# process, since you cannot load 64-bit code into a 32-bit process.
+	# The out-of-process service is slower, but has the benefit that it is isolated from
+	# Excel and so cannot crash Excel.
+	# Uncomment the next line to run the server in a separate process:
+	# _reg_clsctx_ = pythoncom.CLSCTX_LOCAL_SERVER
 
 	### Link to typelib
 	_typelib_guid_ =  '{da5bc306-15b4-498a-9c1c-f560aa8b5c32}'
@@ -40,23 +47,44 @@ class CRDKitXL:
 	_com_interfaces_ = ['IRDKitXL']
 
 	def __init__(self):
+
+# Structured comments starting with RDKITXL are used to markup published
+# properties and functions. Only published properties and functions will
+# be visible in Excel.
+#
+# Structured comments must immediately precede the line defining the
+# property or function. So any comments describing the property or function
+# must be placed *before* the structured comment.
+#
+# The marked-up properties and functions generate corresponding properties
+# and functions in the RDKitXL.idl file which is then compiled to an
+# RDKitXL.tlb type library that Excel can read.
+#
+# All data types have to be made explicit in the generated IDL. Accepted
+# types in the structured comments are 'int', 'str', and 'float'.
+
+# Get RDKit version string.
 #RDKITXL: prop:str
-		self.rdkit_version = rdkit.__version__
+		self.rdkit_info_version = rdkit.__version__
+
+# Get number of function calls done. Requires all published functions to
+# increment this value.
 #RDKITXL: prop:int
-		self.number_of_calls = 0
+		self.rdkit_info_num_calls = 0
 
 # String parameters with default values:
 #   Values must be unicode strings.
 #   Values may not contain " inside the string.
-
+#
 # Debug output: Use win32api.OutputDebugString() and something like DbgView
 # to trace it. Do not use print() - it will cause "Bad file descriptor" failures
 # (suspect that it is a threading issue).
 
+# Calculates a named RDKit descriptor value from a SMILES input.
 #RDKITXL: in:smiles:str, inopt:descriptor:str, out:float
 	def rdkit_descriptor(self, smiles, descriptor=u'MolLogP'):
 		try:
-			self.number_of_calls = self.number_of_calls + 1
+			self.rdkit_info_num_calls = self.rdkit_info_num_calls + 1
 			# win32api.OutputDebugString(str(type(smiles)) + " " + str(type(descriptor)))
 			smiles = dispatch_to_str(smiles)
 			descriptor = dispatch_to_str(descriptor)
@@ -66,33 +94,45 @@ class CRDKitXL:
 			if mol != None:
 				return myfunction(mol)
 			else:
-				return 'Error in parsing SMILES'
-		except Exception, e:
+				# OK, so you are wondering how on Earth a function that is marked up
+				# as out:float can return a string ?! Me too, but it works :-), and
+				# makes it possible to show a decent error to the end user.
+				# Apparently COM returns the value as a variant regardless of the
+				# specified IDL retval type (?)...
+				return 'ERROR: Cannot parse SMILES input.'
+		except Exception as e:
 			return "ERROR: " + str(e)
 		
+# Generates a molfile with 2D coordinates from SMILES input. Useful for depiction.
 #RDKITXL: in:smiles:str, out:str
-	def rdkit_SmilesToMolBlock(self, smiles):
-		self.number_of_calls = self.number_of_calls +1
+	def rdkit_smiles_to_molblock(self, smiles):
+		self.rdkit_info_num_calls = self.rdkit_info_num_calls +1
 		# win32api.OutputDebugString(str(type(smiles)))
 		smiles = dispatch_to_str(smiles)
 
 		mol = Chem.MolFromSmiles(smiles)		
 		if mol != None:
-			#Add coords for depiction
+			# Add coords for depiction.
 			AllChem.Compute2DCoords(mol)
 			return Chem.MolToMolBlock(mol)
 		else:
-			return 'Error in parsing SMILES'
+			return 'ERROR: Cannot parse SMILES input.'
 
 
 def BuildTypelib(idlfile = "RDKitXL.idl"):
-	from distutils.dep_util import newer
 	this_dir = os.path.dirname(__file__)
 	idl = os.path.abspath(os.path.join(this_dir, idlfile))
 	basename = idlfile.split('.')[0]
 	tlb=os.path.splitext(idl)[0] + '.tlb'
-	if newer(idl, tlb):
-		print "Compiling %s" % (idl,)
+	prev_idl = idl + ".previous"
+
+	this_idl_txt = "".join(open(idl, 'r').readlines())
+	previous_idl_txt = "does not exist"
+	if os.path.isfile(prev_idl):
+		previous_idl_txt = "".join(open(prev_idl, 'r').readlines())
+
+	if this_idl_txt != previous_idl_txt:
+		print("Compiling %s" % (idl,))
 		rc = os.system ('midl "%s"' % (idl,))
 		if rc:
 			raise RuntimeError("Compiling MIDL failed!")
@@ -100,8 +140,12 @@ def BuildTypelib(idlfile = "RDKitXL.idl"):
 		# just nuke them
 		for fname in ("dlldata.c %s_i.c %s_p.c %s.h"%(basename, basename, basename)).split():
 			os.remove(os.path.join(this_dir, fname))
+		open(prev_idl, 'w').write("".join(open(idl, 'r').readlines()))
 
-	print "Registering %s" % (tlb,)
+	else:
+		print("No IDL changes.")
+
+	print("Registering %s" % (tlb,))
 	tli=pythoncom.LoadTypeLib(tlb)
 	pythoncom.RegisterTypeLib(tli,tlb)
 
@@ -113,8 +157,8 @@ def UnregisterTypelib():
 									k._typelib_version_[1], 
 									0, 
 									pythoncom.SYS_WIN32)
-		print "Unregistered typelib"
-	except pythoncom.error, details:
+		print("Unregistered typelib")
+	except pythoncom.error as details:
 		if details[0]==winerror.TYPE_E_REGISTRYACCESS:
 			pass
 		else:
@@ -122,7 +166,7 @@ def UnregisterTypelib():
 
 def main(argv=None):
 	if argv is None: argv = sys.argv[1:]
-	genfile = generate_idl(__file__, generatefile="RDkitXL.idl") #Introspective code, Yay!
+	genfile = generate_idl(__file__, generatefile="RDKitXL.idl") #Introspective code, Yay!
 	if '--unregister' in argv:
 		# Unregister the type-libraries.
 		UnregisterTypelib()
